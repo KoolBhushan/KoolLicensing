@@ -19,18 +19,13 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-namespace KoolLicensing.Domain.Entities;
-public class Customer : BaseAuditableEntity
+namespace KoolLicensing.Application.Customers.Commands.UpdateCustomer;
+public class UpdateCustomerCommandValidator : AbstractValidator<UpdateCustomerCommand>
 {
-    public string Name { get; set; } = string.Empty;
-
-    public string Email { get; set; } = string.Empty;
-
-    public string CompanyName { get; set; } = string.Empty;
-
-    public string UserId { get; set; } = string.Empty;
-
-    public ICollection<License> Licenses { get; set; } = [];
-
-    public ICollection<Product> Products { get; set; } = [];
+    public UpdateCustomerCommandValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(50);
+        RuleFor(x => x.Email).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.CompanyName).NotEmpty().MaximumLength(50);
+    }
 }

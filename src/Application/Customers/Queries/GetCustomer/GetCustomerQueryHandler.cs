@@ -19,18 +19,35 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-namespace KoolLicensing.Domain.Entities;
-public class Customer : BaseAuditableEntity
+using KoolLicensing.Application.Common.Exceptions;
+using KoolLicensing.Application.Common.Interfaces;
+
+namespace KoolLicensing.Application.Customers.Queries.GetCustomer;
+public sealed class GetCustomerQueryHandler : IRequestHandler<GetCustomerQuery, CustomerResponse>
 {
-    public string Name { get; set; } = string.Empty;
+    private readonly IApplicationDbContext _context;
+    private readonly IMapper _mapper;
+    private readonly IUser _user;
 
-    public string Email { get; set; } = string.Empty;
+    public GetCustomerQueryHandler(IApplicationDbContext context, IMapper mapper, IUser user)
+    {
+        _context = context;
+        _mapper = mapper;
+        _user = user;
+    }
 
-    public string CompanyName { get; set; } = string.Empty;
+    public async Task<CustomerResponse> Handle(GetCustomerQuery request, CancellationToken cancellationToken)
+    {
+        var product = await _context.Customers
+        .AsNoTracking()
+        .Where(x => x.UserId == _user.Id)
+        .FirstOrDefaultAsync(x => x.Id.Equals(request.Id));
 
-    public string UserId { get; set; } = string.Empty;
+        if (product == null)
+        {
+            throw new EntityNotFoundException($"The customer with id {request.Id} does not exist.");
+        }
 
-    public ICollection<License> Licenses { get; set; } = [];
-
-    public ICollection<Product> Products { get; set; } = [];
+        return _mapper.Map<CustomerResponse>(product);
+    }
 }

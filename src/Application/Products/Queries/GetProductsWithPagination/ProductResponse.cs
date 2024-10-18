@@ -23,7 +23,7 @@ using System.Text;
 using KoolLicensing.Application.TodoItems.Queries.GetTodoItemsWithPagination;
 using KoolLicensing.Domain.Entities;
 
-namespace KoolLicensing.Application.Products.Queries.GetProductsWithPagination;
+namespace KoolLicensing.Application.Products.Queries;
 public record ProductResponse
 {
     public int Id { get; set; }

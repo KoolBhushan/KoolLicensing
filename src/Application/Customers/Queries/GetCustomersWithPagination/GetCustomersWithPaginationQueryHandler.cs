@@ -19,38 +19,31 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using KoolLicensing.Application.Common.Exceptions;
 using KoolLicensing.Application.Common.Interfaces;
-using KoolLicensing.Domain.Exceptions;
-using Microsoft.Extensions.Logging;
+using KoolLicensing.Application.Common.Mappings;
+using KoolLicensing.Application.Common.Models;
 
-namespace KoolLicensing.Application.Products.Commands;
-public sealed class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand>
+namespace KoolLicensing.Application.Customers.Queries.GetCustomersWithPagination;
+public sealed class GetCustomersWithPaginationQueryHandler : IRequestHandler<GetCustomersWithPaginationQuery, PaginatedList<CustomerResponse>>
 {
-    private readonly ILogger<CreateProductCommandHandler> _logger;
-    private readonly IApplicationDbContext _dbContext;
+    private readonly IApplicationDbContext _context;
+    private readonly IMapper _mapper;
     private readonly IUser _user;
 
-    public DeleteProductCommandHandler(ILogger<CreateProductCommandHandler> logger, IApplicationDbContext dbContext, IUser user)
+    public GetCustomersWithPaginationQueryHandler(IApplicationDbContext context, IMapper mapper, IUser user)
     {
-        _logger = logger;
-        _dbContext = dbContext;
+        _context = context;
+        _mapper = mapper;
         _user = user;
     }
 
-    public async Task Handle(DeleteProductCommand request, CancellationToken cancellationToken)
+    public async Task<PaginatedList<CustomerResponse>> Handle(GetCustomersWithPaginationQuery request, CancellationToken cancellationToken)
     {
-        var product = await _dbContext.Products.Where(x => x.UserId.Equals(_user.Id!)).FirstOrDefaultAsync(x => x.Id.Equals(request.Id));
-
-        if (product == null)
-        {
-            var error = $"The product with id {request.Id} does not exist.";
-            _logger.LogCritical(error);
-            throw new EntityNotFoundException(error);
-        }
-
-        _dbContext.Products.Remove(product);
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        return await _context.Customers
+             .AsNoTracking()
+             .Where(x => x.UserId == _user.Id)
+             .OrderBy(x => x.Name)
+             .ProjectTo<CustomerResponse>(_mapper.ConfigurationProvider)
+             .PaginatedListAsync(request.PageNumber, request.PageSize);
     }
 }

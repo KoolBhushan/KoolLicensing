@@ -19,6 +19,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+using KoolLicensing.Application.Common.Exceptions;
 using KoolLicensing.Application.Common.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -42,7 +43,9 @@ public sealed class UpdateProductCommandHandler : IRequestHandler<UpdateProductC
 
         if (product == null)
         {
-            throw new InvalidDataException($"The product with id {request.Id} does not exist.");
+            var error = $"The product with id {request.Id} does not exist.";
+            _logger.LogCritical(error);
+            throw new EntityNotFoundException(error);
         }
 
         product.Name = request.Name;

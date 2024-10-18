@@ -19,12 +19,10 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using System.ComponentModel;
 using KoolLicensing.Application.Common.Interfaces;
 using KoolLicensing.Application.Common.Security;
 using KoolLicensing.Domain.Entities;
 using KoolLicensing.Domain.Events;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace KoolLicensing.Application.Products.Commands;

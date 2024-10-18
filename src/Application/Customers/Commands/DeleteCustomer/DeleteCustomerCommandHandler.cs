@@ -21,36 +21,34 @@
 
 using KoolLicensing.Application.Common.Exceptions;
 using KoolLicensing.Application.Common.Interfaces;
-using KoolLicensing.Domain.Exceptions;
 using Microsoft.Extensions.Logging;
 
-namespace KoolLicensing.Application.Products.Commands;
-public sealed class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand>
+namespace KoolLicensing.Application.Customers.Commands.DeleteCustomer;
+public sealed class DeleteCustomerCommandHandler : IRequestHandler<DeleteCustomerCommand>
 {
-    private readonly ILogger<CreateProductCommandHandler> _logger;
+    private readonly ILogger<DeleteCustomerCommandHandler> _logger;
     private readonly IApplicationDbContext _dbContext;
     private readonly IUser _user;
 
-    public DeleteProductCommandHandler(ILogger<CreateProductCommandHandler> logger, IApplicationDbContext dbContext, IUser user)
+    public DeleteCustomerCommandHandler(ILogger<DeleteCustomerCommandHandler> logger, IApplicationDbContext dbContext, IUser user)
     {
         _logger = logger;
         _dbContext = dbContext;
         _user = user;
     }
 
-    public async Task Handle(DeleteProductCommand request, CancellationToken cancellationToken)
+    public async Task Handle(DeleteCustomerCommand request, CancellationToken cancellationToken)
     {
-        var product = await _dbContext.Products.Where(x => x.UserId.Equals(_user.Id!)).FirstOrDefaultAsync(x => x.Id.Equals(request.Id));
+        var customer = await _dbContext.Customers.Where(x => x.UserId.Equals(_user.Id!)).FirstOrDefaultAsync(x => x.Id.Equals(request.Id));
 
-        if (product == null)
+        if (customer == null)
         {
-            var error = $"The product with id {request.Id} does not exist.";
+            var error = $"The customer with id {request.Id} does not exist.";
             _logger.LogCritical(error);
             throw new EntityNotFoundException(error);
         }
 
-        _dbContext.Products.Remove(product);
-
+        _dbContext.Customers.Remove(customer);
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

@@ -19,18 +19,6 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-namespace KoolLicensing.Domain.Entities;
-public class Customer : BaseAuditableEntity
-{
-    public string Name { get; set; } = string.Empty;
-
-    public string Email { get; set; } = string.Empty;
-
-    public string CompanyName { get; set; } = string.Empty;
-
-    public string UserId { get; set; } = string.Empty;
-
-    public ICollection<License> Licenses { get; set; } = [];
-
-    public ICollection<Product> Products { get; set; } = [];
-}
+namespace KoolLicensing.Application.Customers.Queries.GetCustomer;
+// Include properties to be used as input for the query
+public record GetCustomerQuery(int Id) : IRequest<CustomerResponse>;

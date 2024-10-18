@@ -34,6 +34,8 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
 
         builder.Property(c => c.CompanyName).HasMaxLength(50);
 
+        builder.Property(p => p.UserId).IsRequired();
+
         builder.HasMany(x => x.Products).WithMany(x => x.Customers);
     }
 }

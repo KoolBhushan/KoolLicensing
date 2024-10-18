@@ -19,38 +19,44 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using KoolLicensing.Application.Common.Exceptions;
 using KoolLicensing.Application.Common.Interfaces;
-using KoolLicensing.Domain.Exceptions;
+using KoolLicensing.Application.Products.Commands;
+using KoolLicensing.Domain.Entities;
+using KoolLicensing.Domain.Events;
 using Microsoft.Extensions.Logging;
 
-namespace KoolLicensing.Application.Products.Commands;
-public sealed class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand>
+namespace KoolLicensing.Application.Customers.Commands.CreateCustomer;
+public sealed class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerCommand, int>
 {
-    private readonly ILogger<CreateProductCommandHandler> _logger;
+    private readonly ILogger<CreateCustomerCommandHandler> _logger;
     private readonly IApplicationDbContext _dbContext;
     private readonly IUser _user;
 
-    public DeleteProductCommandHandler(ILogger<CreateProductCommandHandler> logger, IApplicationDbContext dbContext, IUser user)
+    public CreateCustomerCommandHandler(ILogger<CreateCustomerCommandHandler> logger, IApplicationDbContext dbContext, IUser user)
     {
         _logger = logger;
         _dbContext = dbContext;
         _user = user;
     }
 
-    public async Task Handle(DeleteProductCommand request, CancellationToken cancellationToken)
+    public async Task<int> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
     {
-        var product = await _dbContext.Products.Where(x => x.UserId.Equals(_user.Id!)).FirstOrDefaultAsync(x => x.Id.Equals(request.Id));
-
-        if (product == null)
+        var customer = new Customer
         {
-            var error = $"The product with id {request.Id} does not exist.";
-            _logger.LogCritical(error);
-            throw new EntityNotFoundException(error);
-        }
+            Name = request.Name,
+            Email = request.Email,
+            UserId = _user.Id!,
+            CompanyName = request.CompanyName,
+            Products = new List<Product>(),
+            Licenses = new List<License>()
+        };
 
-        _dbContext.Products.Remove(product);
+        customer.AddDomainEvent(new CustomerCreatedEvent(customer));
+
+        _dbContext.Customers.Add(customer);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return customer.Id;
     }
 }
