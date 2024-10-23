@@ -19,7 +19,10 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+using System.Security.Cryptography;
+using System.Text;
 using KoolLicensing.Application.Common.Interfaces;
+using KoolLicensing.Domain.ValueObjects;
 
 namespace KoolLicensing.Application.Common.Security;
 public class CryptoService : ICryptoService
@@ -35,5 +38,38 @@ public class CryptoService : ICryptoService
         var result = guid.Substring(0, stringLength);
 
         return result.ToUpperInvariant();
+    }
+
+    public LicenseKey GenerateKey()
+    {
+        // Generate a new GUID
+        string guid = Guid.NewGuid().ToString("D");
+
+        var split = guid.Split('-');
+
+        var keyBuilder = new StringBuilder();
+        foreach (var key in split) 
+        {
+            keyBuilder.Append(key.Substring(0, 4));
+            keyBuilder.Append('-');
+        }
+
+        var value = keyBuilder.ToString().TrimEnd('-').ToUpperInvariant();
+        var hash = string.Empty;
+
+        // Initialize a SHA256 hash object
+        using (SHA256 sha256 = SHA256.Create())
+        {
+            // Compute the hash of the given string
+            byte[] hashValue = sha256.ComputeHash(Encoding.UTF8.GetBytes(value));
+
+            // Convert the byte array to string format
+            foreach (byte b in hashValue)
+            {
+                hash += $"{b:X2}";
+            }
+        }
+
+       return new LicenseKey { Value = value, Hash = hash };
     }
 }

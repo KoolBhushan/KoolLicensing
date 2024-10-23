@@ -56,7 +56,7 @@ public sealed class CreateProductCommandHandler : IRequestHandler<CreateProductC
             PrivateKey = rsa.ExportEncryptedPrivateKey(2, productCode),
             PublicKey = rsa.ExportPublicKey(),
             Customers = new List<Customer>(),
-            Licenses = new List<Domain.Entities.License>()
+            Licenses = new List<License>()
         };
 
         product.AddDomainEvent(new ProductCreatedEvent(product));

@@ -1,10 +1,14 @@
 ﻿
 using KoolLicensing.Application.Common.Exceptions;
 using KoolLicensing.Application.Common.Models;
+using KoolLicensing.Application.Licenses.Commands.CreateLicense;
+using KoolLicensing.Application.Licenses.Queries.GetLicensesWithPagination;
 using KoolLicensing.Application.Products.Commands;
 using KoolLicensing.Application.Products.Queries;
 using KoolLicensing.Application.Products.Queries.GetProduct;
 using KoolLicensing.Application.Products.Queries.GetProductsWithPagination;
+using Microsoft.AspNetCore.Mvc;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace KoolLicensing.Web.Endpoints;
 
@@ -15,12 +19,15 @@ public class Products : EndpointGroupBase
         app.MapGroup(this)
             .RequireAuthorization()
             .MapGet(GetProductsWithPaginationAsync)
+            .MapGet(GetLicensesWithPaginationAsync, "{id}/licenses")
             .MapGet(GetProductAsync, "{id}")
             .MapDelete(DeleteProductAsync, "{id}")
             .MapPut(UpdateProductAsync, "{id}")
-            .MapPost(CreateProductAsync);
+            .MapPost(CreateProductAsync)
+            .MapPost(CreateLicenseAsync, "{id}/licenses");
     }
 
+    #region Products
     public async Task<IResult> GetProductAsync(ISender sender, int id)
     {
         try
@@ -72,4 +79,22 @@ public class Products : EndpointGroupBase
             return Results.NotFound(ex);
         }
     }
+
+    #endregion
+
+    #region Licenses
+    public async Task<IResult> CreateLicenseAsync(ISender sender, [FromRoute] int id, [FromBody] CreateLicenseCommand command)
+    {
+        if (id != command.ProductId) return Results.BadRequest();
+
+        var response = await sender.Send(command);
+        return Results.Created();
+    }
+
+    public async Task<PaginatedList<LicenseResponse>> GetLicensesWithPaginationAsync(ISender sender, [FromRoute] int id, [FromQuery] int pageNo, [FromQuery] int pageSize)
+    {
+        return await sender.Send(new GetLicensesWithPaginationQuery(id, pageNo, pageSize));
+    }
+
+    #endregion
 }

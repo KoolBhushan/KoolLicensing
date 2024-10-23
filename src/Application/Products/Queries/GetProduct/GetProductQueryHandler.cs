@@ -19,16 +19,8 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using KoolLicensing.Application.Common.Exceptions;
 using KoolLicensing.Application.Common.Interfaces;
-using KoolLicensing.Application.Products.Queries.GetProductsWithPagination;
-using KoolLicensing.Domain.Entities;
-using KoolLicensing.Domain.Exceptions;
 
 namespace KoolLicensing.Application.Products.Queries.GetProduct;
 public sealed class GetProductQueryHandler : IRequestHandler<GetProductQuery, ProductResponse>

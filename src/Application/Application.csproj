@@ -17,8 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Licenses\Commands\" />
-    <Folder Include="Licenses\Queries\" />
     <Folder Include="Machines\Commands\" />
     <Folder Include="Machines\Queries\" />
   </ItemGroup>

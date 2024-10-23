@@ -254,6 +254,103 @@
         ]
       }
     },
+    "/api/Products/{id}/licenses": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "operationId": "GetLicensesWithPaginationAsync",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          },
+          {
+            "name": "pageNo",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 2
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedListOfLicenseResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Products"
+        ],
+        "operationId": "CreateLicenseAsync",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "x-position": 1
+          }
+        ],
+        "requestBody": {
+          "x-name": "command",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLicenseCommand"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 2
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/Products/{id}": {
       "get": {
         "tags": [
@@ -1238,6 +1335,72 @@
           }
         }
       },
+      "PaginatedListOfLicenseResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LicenseResponse"
+            }
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasPreviousPage": {
+            "type": "boolean"
+          },
+          "hasNextPage": {
+            "type": "boolean"
+          }
+        }
+      },
+      "LicenseResponse": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "licenseType": {
+            "$ref": "#/components/schemas/LicenseType"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "expires": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "LicenseType": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "Trial",
+          "Perpetual",
+          "Subscription"
+        ],
+        "enum": [
+          "Trial",
+          "Perpetual",
+          "Subscription"
+        ]
+      },
       "UpdateProductCommand": {
         "type": "object",
         "additionalProperties": false,
@@ -1263,6 +1426,58 @@
           },
           "description": {
             "type": "string"
+          }
+        }
+      },
+      "CreateLicenseCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "productId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "customerId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "licenseType": {
+            "$ref": "#/components/schemas/LicenseType"
+          },
+          "validityInDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxNoOfMachines": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "feature1": {
+            "type": "boolean"
+          },
+          "feature2": {
+            "type": "boolean"
+          },
+          "feature3": {
+            "type": "boolean"
+          },
+          "feature4": {
+            "type": "boolean"
+          },
+          "feature5": {
+            "type": "boolean"
+          },
+          "feature6": {
+            "type": "boolean"
+          },
+          "feature7": {
+            "type": "boolean"
+          },
+          "feature8": {
+            "type": "boolean"
+          },
+          "feature9": {
+            "type": "boolean"
           }
         }
       },
@@ -1370,7 +1585,7 @@
         }
       },
       "PriorityLevel": {
-        "type": "integer",
+        "type": "string",
         "description": "",
         "x-enumNames": [
           "None",
@@ -1379,10 +1594,10 @@
           "High"
         ],
         "enum": [
-          0,
-          1,
-          2,
-          3
+          "None",
+          "Low",
+          "Medium",
+          "High"
         ]
       },
       "TodosVm": {

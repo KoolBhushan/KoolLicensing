@@ -32,7 +32,6 @@ public class LicenseKey : ValueObject
     }
     protected override IEnumerable<object> GetEqualityComponents()
     {
-        yield return Value;
         yield return Hash;
     }
 }
