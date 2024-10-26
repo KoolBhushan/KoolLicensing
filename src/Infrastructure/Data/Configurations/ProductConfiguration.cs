@@ -36,6 +36,8 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         builder.Property(p => p.ProductCode).IsRequired().HasMaxLength(10);
 
+        builder.HasIndex(p => p.ProductCode);
+
         builder.HasMany(p => p.Customers).WithMany(c => c.Products);
     }
 }

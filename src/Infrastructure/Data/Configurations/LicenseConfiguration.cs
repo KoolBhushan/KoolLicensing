@@ -35,5 +35,9 @@ public class LicenseConfiguration : IEntityTypeConfiguration<License>
         builder.HasOne(x => x.Product).WithMany(x => x.Licenses).HasForeignKey(x => x.ProductId);
 
         builder.HasOne(x => x.Customer).WithMany(x => x.Licenses).HasForeignKey(x => x.CustomerId);
+
+        builder.Navigation(x => x.Product).AutoInclude();
+
+        builder.Navigation(x => x.Customer).AutoInclude();
     }
 }

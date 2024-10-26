@@ -1,24 +1,23 @@
 ﻿using KoolLicensing.Application.Common.Exceptions;
 using KoolLicensing.Application.Common.Interfaces;
-using KoolLicensing.Application.Common.Mappings;
-using KoolLicensing.Application.Common.Models;
 using KoolLicensing.Application.Licenses.Commands.CreateLicense;
+using MediatR;
 
-namespace KoolLicensing.Application.Licenses.Queries.GetLicensesWithPagination;
-public sealed class GetLicensesWithPaginationQueryHandler : IRequestHandler<GetLicensesWithPaginationQuery, PaginatedList<LicenseResponse>>
+namespace KoolLicensing.Application.Licenses.Queries.GetLicense;
+public sealed class GetLicenseQueryHandler : IRequestHandler<GetLicenseQuery, LicenseResponse>
 {
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
     private readonly IUser _user;
 
-    public GetLicensesWithPaginationQueryHandler(IApplicationDbContext context, IMapper mapper, IUser user)
+    public GetLicenseQueryHandler(IApplicationDbContext context, IMapper mapper, IUser user)
     {
         _context = context;
         _mapper = mapper;
         _user = user;
     }
 
-    public async Task<PaginatedList<LicenseResponse>> Handle(GetLicensesWithPaginationQuery request, CancellationToken cancellationToken)
+    public async Task<LicenseResponse> Handle(GetLicenseQuery request, CancellationToken cancellationToken)
     {
         var product = await _context.Products
                 .AsNoTracking()
@@ -31,13 +30,19 @@ public sealed class GetLicensesWithPaginationQueryHandler : IRequestHandler<GetL
             throw new EntityNotFoundException(error);
         }
 
-        var licenses = _context.Licenses
+        var license = await _context.Licenses
             .AsNoTracking()
             .Where(x => x.ProductId == request.ProductId)
-            .OrderBy(x => x.Id)
-            .ProjectTo<LicenseResponse>(_mapper.ConfigurationProvider)
-            .AsQueryable();
+            .FirstOrDefaultAsync(x => x.Id.Equals(request.LicenseId));
 
-        return await PaginatedList<LicenseResponse>.CreateAsync(licenses, request.PageNumber, request.PageSize);
+       
+
+        if (license == null)
+        {
+            var error = $"The license with id {request.LicenseId} does not exist.";
+            throw new EntityNotFoundException(error);
+        }
+
+        return _mapper.Map<LicenseResponse>(license);
     }
 }

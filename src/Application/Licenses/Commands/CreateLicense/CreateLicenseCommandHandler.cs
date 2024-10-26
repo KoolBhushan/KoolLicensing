@@ -1,5 +1,6 @@
 ﻿using KoolLicensing.Application.Common.Exceptions;
 using KoolLicensing.Application.Common.Interfaces;
+using KoolLicensing.Domain.Builders;
 using KoolLicensing.Domain.Entities;
 using KoolLicensing.Domain.Enums;
 using MediatR;
@@ -12,13 +13,15 @@ internal sealed class CreateLicenseCommandHandler : IRequestHandler<CreateLicens
     private readonly IApplicationDbContext _dbContext;
     private readonly ICryptoService _cryptoService;
     private readonly IUser _user;
+    private readonly ILicenseBuilder _licenseBuilder;
 
-    public CreateLicenseCommandHandler(ILogger<CreateLicenseCommandHandler> logger, IApplicationDbContext dbContext, ICryptoService cryptoService, IUser user)
+    public CreateLicenseCommandHandler(ILogger<CreateLicenseCommandHandler> logger, IApplicationDbContext dbContext, ICryptoService cryptoService, IUser user, ILicenseBuilder licenseBuilder)
     {
         _logger = logger;
         _dbContext = dbContext;
         _cryptoService = cryptoService;
         _user = user;
+        _licenseBuilder = licenseBuilder;
     }
 
     public async Task<LicenseResponse> Handle(CreateLicenseCommand request, CancellationToken cancellationToken)
@@ -44,37 +47,31 @@ internal sealed class CreateLicenseCommandHandler : IRequestHandler<CreateLicens
         product.Customers.Add(customer);
 
         var keyInfo = _cryptoService.GenerateKey();
-        var newLicense = new License
-        {
-            Key = keyInfo,
-            LicenseType = request.LicenseType,
-            Expires = DateTime.UtcNow.AddDays(request.ValidityInDays),
-            Feature0 = true,
-            Feature1 = request.Feature1,
-            Feature2 = request.Feature2,
-            Feature3 = request.Feature3,
-            Feature4 = request.Feature4,
-            Feature5 = request.Feature5,
-            Feature6 = request.Feature6,
-            Feature7 = request.Feature7,
-            Feature8 = request.Feature8,
-            Feature9 = request.Feature9,
-            Block = false,
-            TrialActivation = request.LicenseType == LicenseType.Trial,
-            MaxNoOfMachines = request.MaxNoOfMachines,
-            Product = product,
-            Customer = customer,
-            ProductId = request.ProductId,
-            CustomerId = request.CustomerId,
-            ActivatedMachines = new List<Machine>()
-        };
+
+        var newLicense = _licenseBuilder
+            .OfType(request.LicenseType)
+            .WithKey(keyInfo)
+            .AddValidDays(request.ValidityInDays)
+            .WithMaxMachines(request.MaxNoOfMachines)
+            .ForCustomer(customer)
+            .ForProduct(product)
+            .WithFeature1(request.Feature1)
+            .WithFeature2(request.Feature2)
+            .WithFeature3(request.Feature3)
+            .WithFeature4(request.Feature4)
+            .WithFeature5(request.Feature5)
+            .WithFeature6(request.Feature6)
+            .WithFeature7(request.Feature7)
+            .WithFeature8(request.Feature8)
+            .WithFeature9(request.Feature9)
+            .Build();
 
         await _dbContext.Licenses.AddAsync(newLicense);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return new LicenseResponse
         {
-            Key = newLicense.Key.Value,
+            Key = newLicense.Key!.Value,
             LicenseType = newLicense.LicenseType,
             ProductName = product.Name,
             CustomerName = customer.Name,

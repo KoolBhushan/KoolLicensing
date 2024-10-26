@@ -2,6 +2,9 @@
 using KoolLicensing.Application.Common.Exceptions;
 using KoolLicensing.Application.Common.Models;
 using KoolLicensing.Application.Licenses.Commands.CreateLicense;
+using KoolLicensing.Application.Licenses.Commands.DeleteLicense;
+using KoolLicensing.Application.Licenses.Commands.UpdateLicense;
+using KoolLicensing.Application.Licenses.Queries.GetLicense;
 using KoolLicensing.Application.Licenses.Queries.GetLicensesWithPagination;
 using KoolLicensing.Application.Products.Commands;
 using KoolLicensing.Application.Products.Queries;
@@ -19,11 +22,14 @@ public class Products : EndpointGroupBase
         app.MapGroup(this)
             .RequireAuthorization()
             .MapGet(GetProductsWithPaginationAsync)
-            .MapGet(GetLicensesWithPaginationAsync, "{id}/licenses")
             .MapGet(GetProductAsync, "{id}")
             .MapDelete(DeleteProductAsync, "{id}")
             .MapPut(UpdateProductAsync, "{id}")
             .MapPost(CreateProductAsync)
+            .MapGet(GetLicenseAsync, "{id}/licenses/{licId}")
+            .MapDelete(DeleteLicenseAsync, "{id}/licenses/{licId}")
+            .MapPut(UpdateLicenseAsync, "{id}/licenses/{licId}")
+            .MapGet(GetLicensesWithPaginationAsync, "{id}/licenses")
             .MapPost(CreateLicenseAsync, "{id}/licenses");
     }
 
@@ -89,6 +95,49 @@ public class Products : EndpointGroupBase
 
         var response = await sender.Send(command);
         return Results.Created();
+    }
+
+    public async Task<IResult> UpdateLicenseAsync(ISender sender, [FromRoute] int id, [FromRoute] int licId, [FromBody] UpdateLicenseCommand command)
+    {
+        if (id != command.ProductId) return Results.BadRequest();
+
+        if (licId != command.LicenseId) return Results.BadRequest();
+
+        try
+        {
+            await sender.Send(command);
+            return Results.NoContent();
+        }
+        catch (EntityNotFoundException ex)
+        {
+            return Results.NotFound(ex);
+        }
+    }
+
+    public async Task<IResult> DeleteLicenseAsync(ISender sender, [FromRoute] int id, [FromRoute] int licId)
+    {
+        try
+        {
+            await sender.Send(new DeleteLicenseCommand(id, licId));
+            return Results.NoContent();
+        }
+        catch (EntityNotFoundException ex)
+        {
+            return Results.NotFound(ex);
+        }
+    }
+
+    public async Task<IResult> GetLicenseAsync(ISender sender, [FromRoute] int id, [FromRoute] int licId)
+    {
+        try
+        {
+            var resposne = await sender.Send(new GetLicenseQuery(id, licId));
+            return Results.Ok(resposne);
+        }
+        catch (EntityNotFoundException ex)
+        {
+            return Results.NotFound(ex);
+        }
     }
 
     public async Task<PaginatedList<LicenseResponse>> GetLicensesWithPaginationAsync(ISender sender, [FromRoute] int id, [FromQuery] int pageNo, [FromQuery] int pageSize)

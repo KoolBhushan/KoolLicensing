@@ -2,6 +2,7 @@
 using KoolLicensing.Application.Common.Behaviours;
 using KoolLicensing.Application.Common.Interfaces;
 using KoolLicensing.Application.Common.Security;
+using KoolLicensing.Domain.Builders;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +11,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<ICryptoService, CryptoService>();
+        services.AddScoped<ILicenseBuilder, LicenseBuilder>();
 
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
