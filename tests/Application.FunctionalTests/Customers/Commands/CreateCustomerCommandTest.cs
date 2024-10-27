@@ -1,4 +1,4 @@
-﻿// Author:
+// Author:
 // Bhushan Kamble
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -24,41 +24,43 @@ using KoolLicensing.Domain.Entities;
 using KoolLicensing.Application.Common.Exceptions;
 using static KoolLicensing.Application.FunctionalTests.Testing;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using KoolLicensing.Application.Customers.Commands.CreateCustomer;
+using NUnit.Framework.Internal;
 
-namespace KoolLicensing.Application.FunctionalTests.Products.Commands;
-public class CreateProductCommandTest : BaseTestFixture
+namespace KoolLicensing.Application.FunctionalTests.Customers.Commands;
+
+public class CreateCustomerCommandTest : BaseTestFixture
 {
     [Test]
     public async Task ShouldRequireMinimumFields()
     {
-        var command = new CreateProductCommand();
+        var command = new CreateCustomerCommand();
 
         await FluentActions.Invoking(() =>
             SendAsync(command)).Should().ThrowAsync<ValidationException>();
     }
-    
+
     [Test]
-    public async Task ShouldCreateProduct()
+    public async Task ShouldCreateCustomer()
     {
         var userId = await RunAsDefaultUserAsync();
 
-        var productId = await SendAsync(new CreateProductCommand
+        var customerId = await SendAsync(new CreateCustomerCommand
         {
-            Name = "Test Product",
-            Description = "Test Description"
+            Name = "Test Customer",
+            Email = "test@customer",
+            CompanyName = "Test Company"
         });
 
-        var item = await FindAsync<Product>(productId);
+        var item = await FindAsync<Customer>(customerId);
 
         item.Should().NotBeNull();
-        item!.ProductCode.Should().NotBeNull();
-        item.Name.Should().Be("Test Product");
-        item.Description.Should().Be("Test Description");
+        item!.Name.Should().Be("Test Customer");
+        item.Email.Should().Be("test@customer");
+        item.CompanyName.Should().Be("Test Company");
         item.CreatedBy.Should().Be(userId);
         item.Created.Should().BeCloseTo(DateTime.Now, TimeSpan.FromMilliseconds(10000));
         item.LastModifiedBy.Should().Be(userId);
         item.LastModified.Should().BeCloseTo(DateTime.Now, TimeSpan.FromMilliseconds(10000));
     }
-
 }
-

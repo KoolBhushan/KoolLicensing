@@ -56,7 +56,7 @@ public sealed class UpdateLicenseCommandHandler : IRequestHandler<UpdateLicenseC
         license.Feature8 = request.Feature8;
         license.Feature9 = request.Feature9;
         license.LicenseType = request.LicenseType;
-        license.Expires = license.Expires.AddDays(request.ValidityInDays);
+        license.Expires = DateTimeOffset.Now.AddDays(request.ValidityInDays);
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 

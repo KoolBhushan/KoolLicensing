@@ -2,8 +2,6 @@
 using System.Runtime.CompilerServices;
 using AutoMapper;
 using KoolLicensing.Application.Common.Interfaces;
-using KoolLicensing.Application.Common.Models;
-using KoolLicensing.Application.TodoItems.Queries.GetTodoItemsWithPagination;
 using KoolLicensing.Application.TodoLists.Queries.GetTodos;
 using KoolLicensing.Domain.Entities;
 using NUnit.Framework;
@@ -31,10 +29,7 @@ public class MappingTests
 
     [Test]
     [TestCase(typeof(TodoList), typeof(TodoListDto))]
-    [TestCase(typeof(License), typeof(TodoItemDto))]
-    [TestCase(typeof(TodoList), typeof(LookupDto))]
-    [TestCase(typeof(License), typeof(LookupDto))]
-    [TestCase(typeof(License), typeof(TodoItemBriefDto))]
+    [TestCase(typeof(TodoItem), typeof(TodoItemDto))]
     public void ShouldSupportMappingFromSourceToDestination(Type source, Type destination)
     {
         var instance = GetInstanceOf(source);
